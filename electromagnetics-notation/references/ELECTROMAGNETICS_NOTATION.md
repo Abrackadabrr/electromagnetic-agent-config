@@ -2,14 +2,20 @@
 
 ## Homogeneous source-free medium
 
-Under `exp(-i*omega*t)`:
+Use the thesis harmonic convention `exp(-i*omega*t)`, while keeping standard
+SI material meanings:
+
+- epsilon: dielectric permittivity;
+- mu: magnetic permeability.
+
+Therefore:
 
 `curl E = +i*omega*mu*H`,
 `curl H = -i*omega*epsilon*E`,
 `k=omega*sqrt(epsilon*mu)`.
 
-For source-free homogeneous regions both fields satisfy the vector Helmholtz
-equation.
+The printed thesis Eq. (1) swaps epsilon/mu in these curl equations; treat that
+as a documented thesis inconsistency, not as the project physics convention.
 
 ## Green function
 

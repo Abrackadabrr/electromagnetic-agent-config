@@ -1,22 +1,44 @@
 # Author-thesis baseline
 
-This file records the conventions and numerical baseline that future work should
-preserve unless a task explicitly introduces a different formulation.
+This file records the conventions and numerical baseline that future work
+should preserve, while explicitly marking internal inconsistencies in the
+printed thesis that must not be propagated blindly.
 
-## Time convention and Maxwell equations
+## Time convention
 
 The thesis uses
 
 `E_hat(x,t)=E(x) exp(-i*omega*t)`,
 `H_hat(x,t)=H(x) exp(-i*omega*t)`.
 
-In the homogeneous source-free exterior it writes
+The outgoing condition and Green function are consistent with `exp(+ikr)`.
+
+## Maxwell-equation audit
+
+The printed thesis Eq. (1) shows
 
 `rot E = +i*epsilon*omega*H`,
 `rot H = -i*mu*omega*E`,
-`k = omega*sqrt(epsilon*mu)`.
 
-The outgoing condition is consistent with `exp(+ikr)`.
+while the surrounding text identifies epsilon as dielectric permittivity and mu
+as magnetic permeability.
+
+With those standard SI material meanings and the same `exp(-i*omega*t)`
+convention, the physically consistent source-free equations are
+
+`curl E = +i*omega*mu*H`,
+`curl H = -i*omega*epsilon*E`.
+
+Later field representations in the thesis are consistent with the standard
+material roles rather than with blindly swapping epsilon/mu.
+
+Therefore:
+
+- preserve the thesis harmonic sign convention;
+- preserve its K/R and Green-function notation;
+- do **not** propagate the printed epsilon/mu swap as a project convention;
+- when a derivation depends on Maxwell prefactors, re-derive it from the
+  standard SI equations above.
 
 ## Surface orientation and traces
 
@@ -78,12 +100,12 @@ In the thesis, the third equation of the algebraically transformed system
 `K[Sigma_0,j_M]`.
 
 Eq. (12), however, contains `i/(omega mu_0) K[Sigma_0,j_M]`; direct
-substitution into the impedance boundary condition would therefore require an
-explicit audit of this coefficient before reusing Eq. (13).
+substitution into the impedance boundary condition therefore requires an
+explicit audit before reusing Eq. (13).
 
-Do **not** silently “correct” or blindly copy this term. When implementing this
-port system, re-derive the coefficient from Eqs. (4), (5), (11), and (12), and
-compare with the existing project code/tests.
+Do **not** silently “correct” or blindly copy this term. Re-derive the
+coefficient from Eqs. (4), (5), (11), and (12), and compare with existing
+project code/tests.
 
 ## Thesis discretization baseline
 
@@ -113,8 +135,7 @@ For K:
 
 - regular/far cells may differentiate under the integral and use ordinary
   Gaussian quadrature;
-- self and sufficiently near interactions split
-  `K=K_0+K_1`;
+- self and sufficiently near interactions split `K=K_0+K_1`;
 - `K_1=k^2 j int F` uses analytic extraction of the `1/R` singularity plus
   quadrature for the bounded remainder;
 - for constant PWC current, `K_0` is transformed to a contour/edge integral.

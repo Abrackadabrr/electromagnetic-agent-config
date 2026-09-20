@@ -17,18 +17,28 @@ FEM / FE-BI is intentionally outside the current scope.
 
 ## Canonical notation
 
-The canonical convention follows the author's thesis and must be preserved
-throughout the skills:
+The canonical integral-equation notation follows the author's thesis:
 
 - time dependence: `exp(-i*omega*t)`;
-- Maxwell:
-  `curl E = +i*omega*epsilon*H`,
-  `curl H = -i*omega*mu*E` in the source-free homogeneous exterior;
 - outgoing scalar Green function:
   `F(x-y) = exp(+i*k*|x-y|)/(4*pi*|x-y|)`;
 - project operators:
   `K[Q,j] = grad div int_Q j(y)F(x-y)dQ_y + k^2 int_Q j(y)F(x-y)dQ_y`,
   `R[Q,j] = int_Q grad_x F(x-y) cross j(y)dQ_y`.
+
+For physical Maxwell equations, keep the standard SI material meaning
+`epsilon = dielectric permittivity`, `mu = magnetic permeability`. Under
+`exp(-i*omega*t)` this gives
+
+`curl E = +i*omega*mu*H`,
+`curl H = -i*omega*epsilon*E`
+
+in a source-free homogeneous medium.
+
+The thesis printout contains an internal epsilon/mu swap in its displayed
+Maxwell Eq. (1); this is treated as an audit point rather than propagated into
+new derivations. Its K/R notation, Green function, jump relations, field
+representations, and discretization conventions remain the project baseline.
 
 When importing literature using another harmonic convention, convert the whole
 convention bundle before reusing equations.
