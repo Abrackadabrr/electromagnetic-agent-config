@@ -1,30 +1,22 @@
 ---
 name: surface-integral-equations
-description: Surface electromagnetic integral equations, equivalent currents, PEC/dielectric formulations, RWG or project PWC discretizations, and surface junctions.
+description: Derive, choose, or implement electromagnetic SIEs on PEC or dielectric surfaces, including EFIE/MFIE/CFIE-style equations, dielectric equivalent-current systems, waveguide-port currents, open/closed surfaces, RWG or PWC discretizations, and surface junctions. Do not trigger for pure VIE or generic Toeplitz/FFT coding.
 ---
 
-# Surface Integral Equations
+# Surface integral equations
 
-Also load `electromagnetics-notation`.
+Assume the project `exp(-i*omega*t)`, K/R notation unless the task explicitly
+states another convention.
 
-Load `operator-discretization` for matrix assembly or quadrature work.
+## Reference routing
 
-## Scope
+- To choose or derive a continuous SIE, or to work with the thesis waveguide
+  port system: read `references/SIE_FORMULATIONS.md`.
+- For PWC/collocation versus RWG/Galerkin discretization:
+  read `references/SURFACE_DISCRETIZATION.md`.
+- For PEC/dielectric contacts, open-sheet sides, or multi-region junction
+  topology: read `references/SURFACE_JUNCTIONS.md`.
+- If source signs/trace conventions differ from the project:
+  use the `electromagnetics-notation` skill.
 
-Support full-wave frequency-domain SIE formulations including PEC EFIE/MFIE/
-CFIE, dielectric SIE/PMCHWT/Müller families, open surfaces, closed surfaces,
-composite conducting/dielectric surfaces, and surface junctions.
-
-## Discretization branches
-
-Do not merge these branches silently:
-
-1. project/thesis collocation with piecewise-constant tangential currents on
-   quadrilateral/parallelogram cells;
-2. classical triangular MoM with RWG basis and Galerkin testing.
-
-Read:
-
-- `references/SIE_FORMULATIONS.md`;
-- `references/SURFACE_DISCRETIZATION.md`;
-- `references/SURFACE_JUNCTIONS.md`.
+Do not load junction rules for an ordinary smooth closed scatterer.

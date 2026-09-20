@@ -1,75 +1,60 @@
-# Canonical Electromagnetic Notation
+# Canonical electromagnetic notation
 
-## Harmonic fields
+## Homogeneous source-free medium
 
-Physical real fields are represented by complex amplitudes with time factor
+Under `exp(-i*omega*t)`:
 
-`exp(-i*omega*t)`.
+`curl E = +i*omega*mu*H`,
+`curl H = -i*omega*epsilon*E`,
+`k=omega*sqrt(epsilon*mu)`.
 
-For source-free homogeneous isotropic media:
-
-`curl E = +i*omega*mu*H`
-
-`curl H = -i*omega*epsilon*E`
-
-`k = omega*sqrt(epsilon*mu)` with the outgoing/passive branch selected
-consistently with the material model.
+For source-free homogeneous regions both fields satisfy the vector Helmholtz
+equation.
 
 ## Green function
 
-`R = |x-y|`
-
-`G_k(x,y) = exp(+i*k*R)/(4*pi*R)`.
+`R=|x-y|`,
+`F_k(x-y)=exp(+i*k*R)/(4*pi*R)`.
 
 Away from `x=y`:
 
-`grad_x G_k = -grad_y G_k`.
+`grad_x F_k = -grad_y F_k`.
 
-The outgoing far phase is `exp(+ikr)` under the project's `exp(-i*omega*t)`
-time convention.
+## Generic project K operator
 
-## Project K operator
+For a surface or volume source domain Q:
 
-For a source domain `Q`:
+`K[Q,j](x)
+ = grad_x div_x int_Q F_k(x-y) j(y) dQ_y
+ + k^2 int_Q F_k(x-y) j(y) dQ_y`.
 
-`K_Q[j](x) = grad_x div_x int_Q G_k(x,y) j(y) dQ_y
-             + k^2 int_Q G_k(x,y) j(y) dQ_y`.
+When Q contains x, interpret/discretize this operator through the formulation's
+valid weak, finite-part, singularity-extracted, or distributional form. Do not
+numerically evaluate a coincident Hessian-like kernel by ordinary quadrature.
 
-For surface currents, use surface/weak formulations appropriate to the chosen
-trace and discretization rather than naively evaluating the second derivative
-at a singular point.
+## Generic project R operator
 
-For voxel PWC VIE, the codebase already exploits an equivalent decomposition in
-which the `grad div` contribution is represented through component jumps across
-voxel faces and the `k^2` term remains a volume Green integral.
+`R[Q,j](x)=int_Q grad_x F_k(x-y) cross j(y) dQ_y`.
 
-## Project R operator
+Cross-product order is part of the definition.
 
-`R_Q[j](x) = int_Q grad_x G_k(x,y) cross j(y) dQ_y`.
+## Electric-current field map
 
-Keep this cross-product order explicit. `a cross b = -(b cross a)`.
+For an electric current density J radiating in a homogeneous background:
 
-## Surface-current field representation used by the thesis
+`E_J = i/(omega*epsilon) K[J]`,
+`H_J = R[J]`,
 
-With the thesis definitions of electric and magnetic surface-current densities:
+provided J uses the same physical/current convention as this representation.
 
-`E = +i/(omega*epsilon) K[J_e] - R[J_m]`
+A magnetic-current contribution must be derived from the declared magnetic
+current convention rather than guessed from operator names.
 
-`H = R[J_e] + i/(omega*mu) K[J_m]`.
+## Gibson symbol map
 
-These prefactors are not universal current definitions. Re-derive them if the
-unknown is a polarization current, contrast current, flux density, or another
-quantity.
+After full convention translation:
 
-## Surface limiting formulas in the thesis convention
+- project `K` corresponds to `k^2 L_Gibson`;
+- project `R` corresponds to `K_Gibson`.
 
-At a smooth non-edge point, for the thesis side/normal convention:
-
-`(R[j])^+ = R[j] + 1/2 * (j cross n)`
-
-`(R[j])^- = R[j] - 1/2 * (j cross n)`
-
-and the stated K trace contains the corresponding surface-divergence jump.
-
-Do not transplant these jump signs to another definition of `+/-`, normal, or
-operator without re-deriving the mapping.
+This is a notation map, not permission to copy Gibson signs verbatim.

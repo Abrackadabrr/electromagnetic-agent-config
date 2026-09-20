@@ -1,42 +1,61 @@
-# Translation from External Electromagnetic Conventions
+# Translation from external electromagnetic conventions
 
-## Gibson-to-project symbol map
+## Required translation record
 
-Gibson commonly uses `exp(+i*omega*t)` and outgoing
-`exp(-ikR)/(4*pi*R)`.
+Before copying a formula, record:
 
-This project uses `exp(-i*omega*t)` and outgoing
+1. time factor;
+2. outgoing Green function;
+3. Maxwell curl signs;
+4. electric-current definition;
+5. magnetic-current definition;
+6. normal orientation;
+7. meaning of plus/minus traces;
+8. gradient variable (x or y);
+9. cross-product order;
+10. operator names and prefactors.
+
+Only then rename the source operators into project K/R notation.
+
+## Gibson-to-project baseline
+
+Gibson commonly uses the opposite harmonic convention and
+`exp(-ikR)/(4*pi*R)` outgoing phase.
+
+The project uses `exp(-i*omega*t)` and
 `exp(+ikR)/(4*pi*R)`.
 
-After translating the harmonic convention:
+After the whole convention is translated:
 
-- project `K` corresponds to `k^2 * Gibson L`;
-- project `R` corresponds to `Gibson K`.
+- `K_project = k^2 L_Gibson`;
+- `R_project = K_Gibson`.
 
-The mapping is semantic, not a copy/paste identity.
+## Do not use blind complex conjugation
 
-## Required conversion procedure
+For real lossless coefficients, changing harmonic convention can resemble
+complex conjugation. This is not a safe general algorithm for lossy media,
+complex material coefficients, branch-dependent square roots, impressed
+currents, or mixed normal/trace conventions.
 
-When importing an equation:
+Re-derive prefactors from Maxwell equations.
 
-1. record the source time factor;
-2. record the source Green function and outgoing branch;
-3. record Maxwell curl signs;
-4. record source definitions of `J` and `M`;
-5. record normal direction and trace-side definitions;
-6. record cross-product order;
-7. derive the same physical field in project convention;
-8. rename operators only after steps 1-7.
+## Minimal derivative checks
 
-## Do not use blind conjugation
+Always verify:
 
-For real lossless parameters many formulas look like complex conjugates after a
-harmonic-convention swap. This shortcut is unsafe for lossy/complex media and
-branch-dependent square roots. Derive signs from Maxwell equations instead.
+`grad_x F = -grad_y F`.
 
-## Common failure mode
+For code helpers returning `-grad_x F`, expand the sign before applying a
+cross product.
 
-Changing `exp(-ikR)` to `exp(+ikR)` while retaining Gibson's `-i*omega`
-prefactors produces an inconsistent solver. Treat time, Green function,
-operator prefactors, jump relations, and far-field phase as one convention
-bundle.
+## Jump-term checks
+
+A jump formula is meaningful only together with:
+
+- chosen normal;
+- source side;
+- plus/minus definition;
+- trace operator;
+- current orientation.
+
+Never transport only the `1/2` term between formulations.

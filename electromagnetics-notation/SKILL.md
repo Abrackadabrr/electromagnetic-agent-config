@@ -1,49 +1,27 @@
 ---
 name: electromagnetics-notation
-description: Canonical sign, harmonic-time, Green-function, and K/R operator notation for this project's electromagnetic integral-equation code.
+description: Translate or audit EM formulas involving time-harmonic signs, outgoing Green functions, K/R operators, trace sides, normals, current definitions, or cross-product order. Use for sign/normalization derivations; do not trigger for ordinary code changes with no electromagnetic formula.
 ---
 
-# Electromagnetics Notation
+# Electromagnetics notation
 
-## Response language
+Use the author's thesis convention as the default:
 
-Respond to the user primarily in Russian. Mixed Russian-English technical prose is explicitly allowed when translation could change, narrow, or obscure meaning. Do not translate mathematical symbols, operator names, function-space names, established computational-electromagnetics terminology, source-code identifiers, API names, or source notation merely to make the prose fully Russian.
+`exp(-i*omega*t)`, `F=exp(+ikR)/(4*pi*R)`.
 
-Load this skill before any EM derivation or implementation.
+Do not convert only the exponential sign. Treat the time factor, Maxwell curl
+signs, Green function, current definitions, normal/trace side, operator
+prefactors, jump terms, and cross-product order as one convention bundle.
 
-## Canonical convention
+## Reference routing
 
-Use `exp(-i*omega*t)` throughout.
+- For the exact canonical convention and thesis baseline:
+  read `references/THESIS_BASELINE.md`.
+- For reusable operator formulas:
+  read `references/ELECTROMAGNETICS_NOTATION.md`.
+- When importing Gibson or any source with a different convention:
+  read `references/NOTATION_TRANSLATION.md`.
+- When a sign disagreement is being debugged:
+  fill `references/CONVENTION_AUDIT.md` before changing code.
 
-Therefore, in a homogeneous source-free isotropic region:
-
-`curl E = +i*omega*mu*H`
-
-`curl H = -i*omega*epsilon*E`
-
-and the outgoing scalar Green function is
-
-`G_k(x,y) = exp(+i*k*R)/(4*pi*R)`, `R = |x-y|`.
-
-Never import a formula containing `exp(-ikR)` without translating the complete
-harmonic convention.
-
-## Canonical operators
-
-Project notation:
-
-`K_user <-> k^2 L_Gibson`
-
-`R_user <-> K_Gibson`
-
-after convention translation.
-
-Read `references/ELECTROMAGNETICS_NOTATION.md` for canonical formulas and
-`references/NOTATION_TRANSLATION.md` before using Gibson or another source with
-an opposite harmonic convention.
-
-## Repository-specific warning
-
-In the EMW codebase, `Helmholtz::V` is documented as minus `grad_x G`. Expand it
-before reasoning about `R` signs. The C++ identifier is not the mathematical
-operator definition.
+Do not infer a mathematical sign from a C++ helper name.

@@ -1,54 +1,79 @@
-# Coupled Surface-Volume Integral Equations
+# Coupled surface-volume integral equations
 
-## Block architecture
+## Block semantics
 
-A VSIE/SIE-VIE formulation contains surface and volume unknowns in one integral
-system. Keep the block semantics explicit:
+For surface unknown x_S and volume unknown x_V:
 
 `[ Z_SS  Z_SV ] [x_S] = [b_S]`
 `[ Z_VS  Z_VV ] [x_V]   [b_V]`.
 
-- `Z_SS`: surface sources observed/tested on the surface;
-- `Z_SV`: volume sources observed/tested on the surface;
-- `Z_VS`: surface sources observed/tested in the volume;
-- `Z_VV`: volume sources observed/tested in the volume.
+Interpretation:
 
-Cross blocks come from the same physical field representation as self blocks.
-Do not invent them by transposing matrices unless reciprocity plus basis/testing
-choices prove that relation.
+- Z_SS: surface source -> surface observation/testing;
+- Z_SV: volume source -> surface observation/testing;
+- Z_VS: surface source -> volume observation/testing;
+- Z_VV: volume source -> volume observation/testing.
 
-## Typical mixed conducting/dielectric problem
+Never obtain a cross block merely by transposing another block unless a proved
+reciprocity relation and the discrete pairings justify it.
 
-One useful topology is:
+## Canonical research case: PEC surface + dielectric J-VIE
 
-- PEC represented by an equivalent electric surface current;
-- inhomogeneous dielectric represented by an induced volume current or flux
-  density;
-- both source sets radiate through the same background Green function;
-- PEC boundary conditions and dielectric volume constitutive equation supply the
-  two block rows.
+Assume:
 
-This keeps the dielectric out of a surface-equivalent-current description while
-retaining a true surface current on the conductor.
+- homogeneous background `epsilon_b,mu_b`;
+- PEC surface S with electric surface current `J_S`;
+- dielectric region V with polarization current
+  `J_V=-i*omega*epsilon_b*chi E`;
+- project K/R convention.
 
-## Junctions
+The electric field produced by either electric current source uses the same
+background map:
 
-A conductor-dielectric contact can require special surface/volume basis handling
-near the shared geometry. The exact rule depends on unknown definitions and
-conformity. Do not automatically import pure-SIE junction reduction rules into a
-VSIE.
+`E[J] = i/(omega*epsilon_b) K_b[J]`,
 
-## Literature
+with integration over S or V as appropriate.
 
-- C. C. Lu and W. C. Chew (2000), coupled surface-volume integral equation for
-  composite metallic/material targets (see citation chain in later VSIE papers).
-- N. Yuan, T. S. Yeo, X. C. Nie, L. W. Li (2005), *RCS Computation of Composite
-  Conducting-Dielectric Objects with Junctions using the Hybrid Volume-Surface
-  Integral Equation*, JEMWA 19(1), 19-36,
-  DOI 10.1163/1569393052955107.
-- X. Nie et al. (2005), *A fast volume-surface integral equation solver for
-  scattering from composite conducting-dielectric objects*, IEEE TAP 53(2),
-  818-824, DOI 10.1109/TAP.2004.841323.
-- C. Luo and C.-C. Lu (2007), *Electromagnetic Scattering Computation Using a
-  Hybrid Surface and Volume Integral Equation Formulation*, ACES Journal 22(3),
-  340-349.
+### Surface block row
+
+PEC boundary condition:
+
+`(E_inc
+ + i/(omega*epsilon_b) K_S[J_S]
+ + i/(omega*epsilon_b) K_V[J_V])_tau = 0`.
+
+This defines Z_SS and Z_SV after the selected surface testing/collocation.
+
+### Volume block row
+
+Inside the dielectric:
+
+`J_V - chi K_V[J_V] - chi K_S[J_S]
+ = -i*omega*epsilon_b*chi E_inc`.
+
+This follows from the J-VIE definition under the same project convention.
+
+Thus the continuous block semantics are:
+
+- Z_SS: tangential surface trace/test of `i/(omega epsilon_b) K_S`;
+- Z_SV: tangential surface trace/test of `i/(omega epsilon_b) K_V`;
+- Z_VS: `-chi K_S` tested in V;
+- Z_VV: `I-chi K_V`.
+
+Discretization-specific jump terms, self terms, and basis normalizations must be
+added according to the actual source/test spaces.
+
+## Contact/junction warning
+
+If the dielectric physically touches the PEC, local singular behavior and
+basis compatibility require separate analysis. Independent surface and volume
+unknowns do not automatically produce a stable junction discretization.
+
+## Validation
+
+Test each block independently:
+
+1. surface current -> field at volume points;
+2. volume current -> tangential field at surface points;
+3. volume self operator;
+4. coupled solve against a limiting or independently implemented case.

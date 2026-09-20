@@ -1,40 +1,33 @@
 ---
 name: volume-integral-equations
-description: Electromagnetic VIE/JVIE/DVIE formulations for inhomogeneous media and coupled surface-volume integral equations.
+description: Derive, compare, or implement electromagnetic E-VIE/J-VIE/D-VIE formulations for penetrable inhomogeneous media and coupled surface-volume systems. Use when the volume unknown, contrast/material term, or SIE-VIE coupling matters; do not trigger for generic voxel FFT or matrix coding alone.
 ---
 
-# Volume Integral Equations
+# Volume integral equations
 
-Also load `electromagnetics-notation`.
+Assume the project `exp(-i*omega*t)` convention and project K/R notation.
 
-Load `operator-discretization` for matrix assembly. Load `uniform-grid-vie` for
-Cartesian voxel grids.
+## First decision: define the unknown
 
-## First rule: define the unknown
+Before writing a VIE, state whether the unknown is:
 
-Before writing a VIE, state whether the unknown is `E`, `D`, polarization or
-contrast current `J`, magnetization current, or a coupled electric/magnetic
-current pair. Different unknowns produce different identity/material terms and
-conditioning.
+- electric field E;
+- electric flux density D;
+- polarization/equivalent current J;
+- electric and magnetic contrast currents.
 
-## Project operator family
+The identity/local material term and conditioning depend on this choice.
 
-Use the same project `K` kernel family on volume domains:
+## Reference routing
 
-`K_V[j] = grad div int_V G j dV + k^2 int_V G j dV`.
+- For formulation cards and conversion between E/J/D unknowns:
+  read `references/VIE_FORMULATIONS.md`.
+- For a mixed PEC-surface + dielectric-volume system:
+  read `references/SIE_VIE_COUPLING.md`.
+- For a Cartesian regular grid and translation-invariant voxel interactions:
+  use `uniform-grid-vie`.
+- For sign/current-convention translation:
+  use `electromagnetics-notation`.
 
-Derive physical prefactors from Maxwell and the selected unknown definition.
-
-For example, with `exp(-i*omega*t)`, if polarization current is explicitly
-defined by `J_p = dP/dt`, then
-`J_p = -i*omega*(epsilon-epsilon_b)*E`.
-Do not use this relation if the code defines another contrast current.
-
-## Coupled SIE-VIE / VSIE
-
-Read `references/SIE_VIE_COUPLING.md` whenever both surface and volume unknowns
-are present.
-
-## References
-
-Read `references/VIE_FORMULATIONS.md` for formulation families and literature.
+Do not call two equations “the same VIE” until their unknown definitions and
+material normalizations have been matched.

@@ -1,49 +1,91 @@
-# Surface Integral Equation Formulations
+# Surface integral-equation formulation cards
 
-## Canonical operator layer
+All equations below use the project `exp(-i*omega*t)` convention and project
+K/R operators unless explicitly stated otherwise.
 
-All equations must first be written with project `K`, `R`, and
-`G=exp(+ikR)/(4*pi*R)`.
+## 1. PEC electric-field equation in project notation
 
-For the thesis current definitions:
+Assume a surface electric-current density J radiates
 
-`E = i/(omega*epsilon) K[J_e] - R[J_m]`
+`E_J = i/(omega*epsilon_b) K_S[J]`.
 
-`H = R[J_e] + i/(omega*mu) K[J_m]`.
+For a PEC surface, impose the tangential total electric field condition:
 
-Boundary equations are obtained by taking the correct tangential/normal traces
-and adding only the jump terms justified by the geometry and trace convention.
+`(E_inc + E_J)_tau = 0`.
 
-## PEC
+Therefore the EFIE-like equation in project notation is
 
-For a PEC, enforce zero tangential total electric field. Depending on geometry
-and conditioning requirements this leads to EFIE or a combined formulation.
-MFIE/CFIE jump terms require the closed-surface assumptions appropriate to the
-chosen formulation; do not apply a closed-surface `1/2 I` term to an open sheet
-without a separate derivation.
+`i/(omega*epsilon_b) (K_S[J])_tau = -(E_inc)_tau`.
 
-## Penetrable dielectric interfaces
+On an open PEC sheet, the boundary condition is imposed on the required sides;
+do not add a closed-surface magnetic jump term merely because the geometry is a
+surface mesh.
 
-Equivalent electric and magnetic surface currents may be introduced and
-regional representations combined using continuity of tangential E and H.
-PMCHWT/Müller-type equations from external references must be translated from
-their original time/normal/current conventions before coding.
+## 2. MFIE / CFIE warning
 
-## Composite surfaces
+The exact MFIE identity depends on the definition of the surface-current
+unknown (for example `n cross H` versus `H cross n`), normal direction, and
+which R trace is used.
 
-Keep region-side contributions explicit until continuity and junction
-constraints are unambiguous. Do not assume one geometric edge means one
-algebraic current unknown.
+Do not hard-code a universal project MFIE from a memorized `1/2 I +/- K`
+formula. Instead:
 
-## Reference literature
+1. declare the current definition;
+2. write `H=H_inc+R[J]`;
+3. choose exterior/interior trace under the project plus/minus convention;
+4. substitute the thesis R jump formula;
+5. only then rearrange to MFIE;
+6. form CFIE as the requested linear combination of already audited EFIE and
+   MFIE equations.
 
-- Rao, Wilton, Glisson (1982), *Electromagnetic scattering by surfaces of
-  arbitrary shape*, IEEE TAP 30(3), 409-418, DOI 10.1109/TAP.1982.1142818.
-  Classical triangular surface MoM/RWG lineage.
-- W. C. Gibson, *The Method of Moments in Electromagnetics*. Use as a source for
-  SIE/MoM/junction methodology, but convert from Gibson's harmonic convention
-  and operator names.
-- J. L. Volakis and K. Sertel, *Integral Equation Methods for
-  Electromagnetics*. General SIE/MoM reference.
-- The user's thesis is authoritative for the project's `K`, `R`, Green function,
-  field representation, and PWC/collocation surface path.
+This explicit derivation is safer than translating a named equation from a
+different convention.
+
+## 3. Thesis waveguide-port system
+
+The thesis introduces:
+
+- electric surface current `j_E` on the whole surface `Sigma`;
+- magnetic surface current `j_M` on the port surface `Sigma_0`.
+
+Fields:
+
+`E = i/(omega*epsilon_0) K[Sigma,j_E] - R[Sigma_0,j_M]`;
+
+`H = R[Sigma,j_E] + i/(omega*mu_0) K[Sigma_0,j_M]`.
+
+The transformed Eq. (13) uses tangential components and the R jump term. When
+implementing it, consult `electromagnetics-notation/references/THESIS_BASELINE.md`
+because the printed third line contains a coefficient that must be re-audited
+against Eq. (12) rather than copied blindly.
+
+## 4. Dielectric surface-equivalent-current systems
+
+For a closed penetrable interface separating two homogeneous regions:
+
+1. choose one normal orientation and keep it globally fixed;
+2. introduce electric and magnetic equivalent surface-current definitions;
+3. write regional E/H representations using each region's `k,epsilon,mu`;
+4. take the appropriate traces from each side;
+5. enforce continuity of tangential E and H;
+6. combine the two regional equations into the desired PMCHWT-, Müller-, or
+   related system;
+7. simplify jump terms only after current/normal/trace conventions are explicit.
+
+External PMCHWT/Müller formulas are often written under different harmonic
+conventions. Translate them through the notation skill before coding.
+
+## 5. Formulation record required before implementation
+
+Record:
+
+- geometry: open/closed/composite;
+- region material parameters;
+- unknown current definitions;
+- normal direction;
+- observation side of every trace;
+- project K/R field representation;
+- boundary/continuity conditions;
+- resulting block rows.
+
+If any item is missing, derive it before assembling a matrix.

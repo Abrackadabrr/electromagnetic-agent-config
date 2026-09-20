@@ -1,38 +1,40 @@
-# Discretization Patterns
+# Discretization patterns
 
-## Collocation/PWC
+## PWC collocation
 
-A matrix coefficient is an operator value at a collocation point projected onto
-a local testing direction. It is not an L2 Galerkin inner product.
+A coefficient is an operator value at a receiver point projected onto a local
+receiver direction. It is not an L2 Galerkin integral.
 
-## Galerkin
+Use the thesis matrix-entry convention when working on the baseline EMW-style
+surface scheme.
 
-A matrix coefficient is a tested integral of an operator applied to a source
-basis. Keep complex inner-product convention explicit: bilinear versus
-sesquilinear testing must match the project implementation.
+## RWG Galerkin
 
-## Surface RWG
+RWG functions are edge-based surface basis functions on triangle pairs.
+Preserve edge orientation consistently in basis, surface divergence, and
+testing.
 
-RWG basis functions live on triangle pairs and encode normal-current continuity
-across the common edge. Use signed edge orientation consistently in basis,
-divergence, and testing.
+Do not treat an RWG coefficient as a point-sampled PWC coefficient.
 
-## Volume SWG
+## SWG / tetrahedral volume basis
 
-SWG functions live on tetrahedral face neighborhoods and are commonly used for
-divergence-conforming volume discretizations. Their continuity and normalization
-must match the selected VIE unknown.
+SWG-type functions are classical divergence-conforming volume bases associated
+with tetrahedral faces. Their continuity and normalization must match the
+chosen VIE unknown, especially D-VIE/flux-density formulations.
 
-## Cartesian PWC/PWL
+## Cartesian PWC/PWL volume basis
 
-For translated voxels on a uniform grid, choose one fixed local scalar/vector
-basis on the reference voxel and obtain every other basis by translation. This
-is the algebraic prerequisite for exact displacement-based Toeplitz storage of
-the homogeneous-background Green operator.
+On a regular voxel grid, translated basis/testing functions should be generated
+from one reference voxel whenever translation invariance is being exploited.
 
-## Cross-discretization blocks
+PWC vector basis: typically three Cartesian component coefficients per voxel.
 
-In VSIE, a surface-to-volume block and a volume-to-surface block may use
-different basis/test spaces and dimensions. Derive each tested integral directly
-rather than forcing a shared matrix-element template that assumes identical
-cell dimensionality.
+Discontinuous PWL: local scalar pulse/linear modes times vector components;
+self/near formulas must be re-derived rather than copied from PWC.
+
+## Mixed VSIE blocks
+
+A surface-to-volume block and a volume-to-surface block can use different
+source and test spaces. Derive each block from the physical field
+representation. Do not create one generic matrix-entry template that assumes
+same-dimensional cells on both sides.

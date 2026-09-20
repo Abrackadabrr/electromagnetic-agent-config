@@ -1,59 +1,123 @@
-# Volume Integral Equation Formulations
+# Volume integral-equation formulation cards
 
-## Formulation families
+This reference extends the thesis research direction to penetrable media. The
+thesis itself does not derive these VIE equations; it cites regular-grid
+FFT-JVIE as a natural structured-integral-equation example. The equations below
+are therefore an extension written in the thesis/project convention.
 
-Do not use “the VIE” as if it were unique. Common unknown choices include:
+Assume a nonmagnetic inhomogeneous dielectric in a homogeneous background:
 
-- E-field VIE (E-VIE);
-- electric-flux-density VIE (D-VIE);
-- equivalent-current / polarization-current VIE (J-VIE);
-- potential formulations;
-- coupled electric/magnetic volume-current formulations for simultaneous
-  electric and magnetic contrast.
+- background `epsilon_b, mu_b`;
+- `k_b=omega*sqrt(epsilon_b*mu_b)`;
+- relative electric contrast
+  `chi=(epsilon-epsilon_b)/epsilon_b`;
+- project background operator `K_b` built with
+  `F_b=exp(i*k_b*R)/(4*pi*R)`.
 
-The unknown choice controls functional space, local material term, spectrum,
-and natural discretization.
+For `exp(-i*omega*t)`, define polarization/contrast current
 
-## Uniform Cartesian discretizations
+`J = -i*omega*(epsilon-epsilon_b)*E
+    = -i*omega*epsilon_b*chi*E`.
 
-For a voxel grid, important low-order choices are:
+The background field radiated by J is
 
-- PWC vector basis: 3 scalar component unknowns per active voxel;
-- discontinuous PWL vector basis: commonly pulse plus x/y/z linear scalar modes
-  per component, giving 12 coefficients per voxel.
+`E_J = i/(omega*epsilon_b) K_b[J]`.
 
-Galerkin testing on identical translated voxels makes the homogeneous-background
-Green interaction translationally invariant and suitable for Toeplitz/FFT
-acceleration.
+Hence
 
-## Tetrahedral discretizations
+`E = E_inc + i/(omega*epsilon_b) K_b[J]`.
 
-For unstructured volumes, SWG-type divergence-conforming tetrahedral basis
-functions are a classical option, especially for D-VIE/flux-density
-formulations. Do not substitute SWG into a current formulation without checking
-the required space and continuity.
+## 1. E-VIE
 
-## Derivative handling
+Substitute J into the field representation:
 
-Strongly singular `grad div` forms should not be implemented by direct numerical
-second differentiation at coincident cells. Prefer a weak/integration-by-parts
-form, face-jump representation for PWC voxels, or another source-verified
-singularity reduction.
+`E - K_b[chi E] = E_inc`.
+
+Important: for spatially varying chi, the multiplication by chi is inside the
+source argument of K. Do not commute the material multiplier through the
+translation-invariant Green operator.
+
+### Implementation record
+
+- unknown: E;
+- local/material operation: source multiplication by chi;
+- nonlocal operation: K_b;
+- heterogeneous full operator is not globally Toeplitz even when K_b on a
+  uniform grid is.
+
+## 2. J-VIE
+
+Use
+
+`E = i J/(omega*epsilon_b*chi)`
+
+only where chi is nonzero, or derive algebraically without dividing in vacuum.
+
+From the field representation:
+
+`J - chi K_b[J] = -i*omega*epsilon_b*chi*E_inc`.
+
+This form is particularly natural for a dielectric support consisting only of
+active contrast voxels.
+
+### Implementation record
+
+- unknown: J;
+- local term: identity;
+- local material multiplier: chi;
+- nonlocal term: K_b[J];
+- RHS: `-i*omega*epsilon_b*chi E_inc`.
+
+Do not change the J definition without re-deriving all prefactors.
+
+## 3. D-based formulation
+
+Let `D=epsilon E` and define
+
+`tau=(epsilon-epsilon_b)/epsilon = 1-epsilon_b/epsilon`.
+
+Then
+
+`J=-i*omega*tau*D`.
+
+A D-VIE can be obtained by substituting this identity into the same background
+field representation and multiplying by the chosen local material factors.
+
+Because D-VIE literature uses several normalizations and operator scalings,
+record the exact local multiplier and unknown normalization before coding.
+Do not infer a D-VIE by renaming an E-VIE vector.
+
+## 4. Magnetic contrast
+
+If `mu != mu_b`, introduce the corresponding magnetic contrast source or use
+a formulation derived for simultaneous electric/magnetic contrast. Do not
+hide magnetic contrast inside the electric chi above.
+
+## 5. Function-space/discretization choice
+
+- Cartesian PWC/PWL: natural for voxelized regular-grid FFT approaches.
+- Tetrahedral SWG-type bases: classical unstructured divergence-conforming
+  volume option.
+
+The selected unknown determines what continuity/conformity is physically and
+numerically appropriate.
+
+## 6. Validation
+
+For a homogeneous dielectric sphere/cylinder where an analytic solution is
+available:
+
+1. refine the volume mesh;
+2. compare fields or scattering quantities with the analytic solution;
+3. verify the sign of the radiated field independently;
+4. compare dense/reference and structured/FFT applications of K_b;
+5. monitor residual and physically relevant observables separately.
 
 ## Literature
 
-- D. H. Schaubert, D. R. Wilton, A. W. Glisson et al. (1984), *A tetrahedral
-  modeling method for electromagnetic scattering by arbitrarily shaped
-  inhomogeneous dielectric bodies*, IEEE TAP 32(1), 77-85,
-  DOI 10.1109/TAP.1984.1143193.
-- M. I. Sancer, K. Sertel, J. L. Volakis, P. Van Alstine (2006), *On Volume
-  Integral Equations*, IEEE TAP 54(5), 1488-1495,
-  DOI 10.1109/TAP.2006.874316. Important for careful treatment of derivatives of
-  discontinuous material functions.
-- A. G. Polimeridis, J. F. Villena, L. Daniel, J. K. White (2014), *Stable
-  FFT-JVIE solvers for fast analysis of highly inhomogeneous dielectric
-  objects*, JCP 269, 280-296, DOI 10.1016/j.jcp.2014.03.026. Uniform-grid
-  Galerkin equivalent-current VIE with FFT acceleration.
-- I. P. Georgakis et al. (2019), *A Fast Volume Integral Equation Solver with
-  Linear Basis Functions for the Accurate Computation of Electromagnetic Fields
-  in MRI*, arXiv:1902.02196. Discontinuous PWL basis on uniform voxel grids.
+- Polimeridis, Villena, Daniel, White (JCP 2014): stable FFT-JVIE on voxel
+  grids.
+- Schaubert/Wilton/Glisson et al. (IEEE TAP 1984): tetrahedral dielectric
+  volume modeling.
+- Sancer/Sertel/Volakis/Van Alstine (IEEE TAP 2006): careful VIE formulation
+  and material-derivative issues.

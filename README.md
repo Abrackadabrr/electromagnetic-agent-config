@@ -1,82 +1,65 @@
 # electromagnetic-agent-config
 
-Shared Codex skills for scientific software development in computational electromagnetics, with emphasis on surface integral equations (SIE), volume integral equations (VIE), coupled surface-volume formulations (VSIE), operator discretization, and regular-grid / FFT-accelerated VIE.
+Shared Codex skills for research and software development in computational
+electromagnetics based on integral equations.
 
-The canonical electromagnetic convention used by these skills is `exp(-i*omega*t)`, with outgoing Green function `G = exp(+ikR)/(4*pi*R)`. The project notation treats `K_project = k^2 L_Gibson` and `R_project = K_Gibson` after full convention translation.
+The configuration is intentionally focused on:
 
-## Repository layout
+- surface integral equations (SIE);
+- volume integral equations (VIE);
+- coupled surface-volume formulations (VSIE);
+- discretization and singular integration of electromagnetic operators;
+- structured electromagnetic problems: repeated/periodic geometry,
+  translation-invariant interaction blocks, low-rank separated interactions,
+  and regular-grid voxel operators.
 
-This repository is intentionally laid out so that the repository root can be mounted directly at a Codex repository skill directory:
+FEM / FE-BI is intentionally outside the current scope.
 
-```text
-electromagnetic-agent-config/
-├── electromagnetics-notation/
-│   ├── SKILL.md
-│   └── references/
-├── surface-integral-equations/
-│   ├── SKILL.md
-│   └── references/
-├── volume-integral-equations/
-│   ├── SKILL.md
-│   └── references/
-├── operator-discretization/
-│   ├── SKILL.md
-│   └── references/
-├── uniform-grid-vie/
-│   ├── SKILL.md
-│   └── references/
-└── SOURCES.md
-```
+## Canonical notation
 
-There is deliberately no shared project `AGENTS.md` here. Repository-specific operating rules belong in the root `AGENTS.md` of each consuming project.
+The canonical convention follows the author's thesis and must be preserved
+throughout the skills:
 
-## Recommended installation as a Git submodule
+- time dependence: `exp(-i*omega*t)`;
+- Maxwell:
+  `curl E = +i*omega*epsilon*H`,
+  `curl H = -i*omega*mu*E` in the source-free homogeneous exterior;
+- outgoing scalar Green function:
+  `F(x-y) = exp(+i*k*|x-y|)/(4*pi*|x-y|)`;
+- project operators:
+  `K[Q,j] = grad div int_Q j(y)F(x-y)dQ_y + k^2 int_Q j(y)F(x-y)dQ_y`,
+  `R[Q,j] = int_Q grad_x F(x-y) cross j(y)dQ_y`.
 
-From the root of a Codex-enabled project:
+When importing literature using another harmonic convention, convert the whole
+convention bundle before reusing equations.
 
-```bash
-mkdir -p .agents
-git submodule add https://github.com/Abrackadabrr/electromagnetic-agent-config.git .agents/skills
-git submodule update --init --recursive
-```
+## Codex layout
 
-This yields:
+This repository is meant to be exposed directly under `.agents/skills`.
+Each top-level skill directory contains a focused `SKILL.md`; detailed
+mathematics lives in `references/` and should be loaded only when relevant.
 
-```text
-project/
-├── AGENTS.md
-└── .agents/
-    └── skills/   # this repository as a submodule
-```
+Current skills:
 
-Codex discovers repository skills under `$REPO_ROOT/.agents/skills`. Each skill has its own `SKILL.md` with `name` and `description` metadata; references are loaded only when needed.
+- `electromagnetics-notation`;
+- `surface-integral-equations`;
+- `volume-integral-equations`;
+- `operator-discretization`;
+- `uniform-grid-vie`;
+- `structured-em-operators`.
 
-## Update workflow
+Repository/project-specific API maps do **not** belong here. Put them in the
+consuming repository's `AGENTS.md`, docs, or a project-local skill.
 
-After updating this repository:
+## Research direction
 
-```bash
-cd .agents/skills
-git pull
-cd ../..
-git add .agents/skills
-git commit -m "Update electromagnetic Codex skills"
-```
+The thesis baseline is not only a notation source. It defines the intended
+research direction: exploit structure created by integral-equation
+discretizations. Important examples are repeated interaction blocks in
+periodic arrays, block/multilevel Toeplitz structure, low-rank far
+interactions, regular-grid VIE translation invariance, and preconditioners or
+tensor representations that preserve these structures.
 
-The parent project therefore pins a concrete revision of the shared scientific configuration.
-
-## Scope
-
-The current skill set covers:
-
-- electromagnetic sign and notation conventions;
-- PEC and dielectric SIE formulations;
-- PWC/collocation and RWG/Galerkin surface discretization branches;
-- E-VIE / J-VIE / D-VIE formulation distinctions;
-- coupled SIE-VIE / VSIE block formulations;
-- singular and near-singular operator discretization;
-- voxel Galerkin discretization on uniform Cartesian grids;
-- block-Toeplitz structure and FFT acceleration;
-- mapping to the current EMW C++ code architecture.
-
-FEM / FE-BI is intentionally outside the current configuration.
+For generic Toeplitz/FFT/BLAS/LAPACK/preconditioning implementation details,
+use a numerical-linear-algebra skill set rather than duplicating those topics
+inside this repository.

@@ -1,49 +1,43 @@
-# Quadrature and Singularities
+# Quadrature and singularities
 
-## Interaction classification
+## Interaction classes
 
-Do not use one quadrature rule for all pairs. Classify at least:
+At minimum distinguish:
 
 - far regular;
-- near regular but sharply varying;
+- near regular but rapidly varying;
 - touching/adjacent;
-- self/coincident;
-- principal-value or finite-part cases where required by the operator.
+- coincident/self;
+- principal-value or finite-part cases when required by the operator.
 
-## Singularity extraction
+## Helmholtz singularity extraction
 
-For `G=exp(+ikR)/(4*pi*R)`, a basic split is
+With project Green function:
 
-`G = 1/(4*pi*R) + [exp(+ikR)-1]/(4*pi*R)`.
+`F=1/(4*pi*R) + [exp(i*k*R)-1]/(4*pi*R)`.
 
-The bracketed term is bounded as `R -> 0`. Integrate the Newtonian-potential part
-analytically when an appropriate cell formula exists, and integrate the bounded
-remainder numerically.
+The bracketed term is bounded as `R -> 0`.
 
-## Project surface PWC K
+When an analytic cell formula is available, integrate the Newtonian part
+analytically and use numerical quadrature only on the bounded remainder.
 
-The thesis/code path splits K into:
+## Thesis surface-PWC K path
 
-- a `grad div` contribution that can be transformed to cell-boundary/contour
-  integrals for PWC cells;
-- a `k^2` Green-potential contribution with `1/R` singularity extraction.
+- far: differentiated regular kernel + Gaussian quadrature;
+- self/near: split `K=K_0+K_1`;
+- `K_1`: analytic `1/R` extraction;
+- `K_0`: contour/edge reduction for constant PWC current.
 
-Near non-self cells may require the same stabilized path even when the integral
-is formally regular.
+## Volume-PWC principle
 
-## Project voxel PWC K
-
-The current volume code uses a useful weak/distributional structure:
-
-- `k^2 * int_V G j` is evaluated as a volume potential;
-- the `grad div` contribution of a cellwise constant vector field is represented
-  by jumps of normal/component values across voxel faces and surface integrals.
-
-This avoids direct coincident evaluation of a Hessian-like kernel. Preserve this
-strategy unless replacing it with a mathematically derived alternative.
+For a cellwise-constant volume field, a weak/distributional treatment can move
+the grad-div contribution onto voxel faces/jumps instead of numerically
+evaluating a coincident Hessian kernel.
 
 ## Error control
 
-Adaptive integration tolerances are numerical parameters, not physical
-constants. Convergence studies must vary quadrature/refinement independently of
-mesh resolution.
+Quadrature order, near threshold, and adaptive tolerance are numerical
+parameters. Validate them independently of the physical mesh-refinement study.
+
+Never justify a singular rule only because a final linear solve “looks
+reasonable.”
