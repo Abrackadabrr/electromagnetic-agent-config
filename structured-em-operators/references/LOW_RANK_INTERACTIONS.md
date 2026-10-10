@@ -39,3 +39,27 @@ iterations or unchanged physical observables.
 The EM skill explains *why* separation produces low rank and what error must be
 validated. Generic ACA kernels, SVD, GEMM batching, memory layout, and threading
 belong to numerical-linear-algebra skills.
+
+
+## Mosaic-skeleton / zaiMSk bridge
+
+For an EM matrix available through an on-demand coefficient function
+`A(i,j)`, mosaic-skeleton compression can be used without first materializing
+the dense matrix.
+
+Keep the responsibilities separate:
+
+1. this EM layer defines the physical source/test DOFs, matrix coefficient,
+   support geometry, and a defensible near/far separation criterion;
+2. the NLA `mosaic-skeleton-matrices` skill defines how to expose
+   `A(i,j)` to zaiMSk, how optional geometry enters the MSk clustering/oracle,
+   how to build the approximation, and how to validate the compressed matvec.
+
+For EM integral equations, physical geometry is normally preferable to pure
+index geometry whenever DOF ordering does not faithfully encode spatial
+distance. The geometry passed to the matrix-compression layer should bound the
+actual basis/test supports, not merely store arbitrary mesh indices.
+
+Do not let the mosaic admissibility test replace singular/near-singular
+quadrature classification automatically: block compressibility and
+matrix-element integration accuracy are different decisions.

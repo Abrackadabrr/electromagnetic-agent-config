@@ -20,3 +20,15 @@ linear-algebra representation.
 
 Do not materialize a generic dense matrix until the geometric invariances and
 separation structure have been checked.
+
+## Mosaic-skeleton implementation bridge
+
+When the chosen EM compression strategy is a mosaic-skeleton matrix, use the
+`mosaic-skeleton-matrices` skill from
+`Abrackadabrr/nla-anget-config` for the zaiMSk/MSk API, arbitrary
+matrix-element callbacks, geometry-aware oracles, validation, and tuning.
+
+This EM skill remains responsible for the physical decision:
+which source/test supports are geometrically near or far, which matrix
+coefficient is being evaluated, and why a separated block is expected to have
+low numerical rank.

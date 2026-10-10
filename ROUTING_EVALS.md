@@ -14,6 +14,8 @@ that consuming agents must read.
 | “Why is the voxel Green block Toeplitz on a regular grid?” | uniform-grid-vie |
 | “Why does a periodic array give repeated/block-Toeplitz interaction blocks?” | structured-em-operators |
 | “Should distant EM interaction blocks be low rank?” | structured-em-operators |
+| “Build a mosaic-skeleton approximation of my electromagnetic matrix from A(i,j).” | structured-em-operators + NLA mosaic-skeleton-matrices |
+| “Use RWG/PWC geometry to drive zaiMSk near/far blocks.” | structured-em-operators + NLA mosaic-skeleton-matrices |
 | “Implement a generic 3-level Toeplitz FFT matvec.” | no EM skill required; use NLA skills |
 | “Optimize DGEMM cache blocking.” | no EM skill required |
 | “Explain the spectral theorem for compact operators.” | no automatic EM skill required |
